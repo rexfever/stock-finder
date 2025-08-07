@@ -29,7 +29,7 @@ function App() {
       <footer className="bg-white border-t mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="text-center text-sm text-gray-500">
-            <p>© 2024 키움 주식 검색기. 투자 판단은 본인의 책임입니다.</p>
+            <p>© {new Date().getFullYear()} 키움 주식 검색기. 투자 판단은 본인의 책임입니다.</p>
           </div>
         </div>
       </footer>

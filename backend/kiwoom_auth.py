@@ -21,7 +21,13 @@ class KiwoomAuth:
             raise ValueError("키움 API 키가 설정되지 않았습니다. .env 파일을 확인하세요.")
     
     def get_access_token(self) -> str:
-        """액세스 토큰 발급/갱신"""
+        """
+        키움증권 API 토큰 발급/갱신
+        
+        주의: 키움증권은 OAuth2 REST API를 공식적으로 지원하지 않습니다.
+        실제로는 OCX(ActiveX) 기반의 Open API+를 사용해야 합니다.
+        현재는 개발/테스트를 위한 모의 토큰을 반환합니다.
+        """
         current_time = datetime.now()
         
         # 캐시된 토큰이 있고 아직 유효하다면 재사용
@@ -30,35 +36,19 @@ class KiwoomAuth:
             current_time < self.token_cache["expires_at"]):
             return self.token_cache["access_token"]
         
-        # 새 토큰 발급
-        url = f"{self.base_url}/oauth2/token"
-        headers = {
-            "Content-Type": "application/json"
-        }
-        data = {
-            "grant_type": "client_credentials",
-            "appkey": self.app_key,
-            "appsecret": self.app_secret
+        # 키움증권은 OAuth2 REST API를 지원하지 않으므로 모의 토큰 생성
+        print("⚠️  키움증권은 OCX 기반 API를 사용합니다. 모의 토큰을 생성합니다.")
+        
+        # 모의 토큰 생성 (개발/테스트용)
+        mock_token = f"MOCK_KIWOOM_TOKEN_{current_time.strftime('%Y%m%d_%H%M%S')}"
+        
+        # 토큰 캐시에 저장 (1시간 유효)
+        self.token_cache = {
+            "access_token": mock_token,
+            "expires_at": current_time + timedelta(hours=1)
         }
         
-        try:
-            response = requests.post(url, headers=headers, json=data)
-            response.raise_for_status()
-            
-            token_data = response.json()
-            access_token = token_data.get("access_token")
-            expires_in = token_data.get("expires_in", 3600)  # 기본 1시간
-            
-            # 토큰 캐시에 저장 (만료시간 10분 여유)
-            self.token_cache = {
-                "access_token": access_token,
-                "expires_at": current_time + timedelta(seconds=expires_in - 600)
-            }
-            
-            return access_token
-            
-        except requests.exceptions.RequestException as e:
-            raise Exception(f"토큰 발급 실패: {str(e)}")
+        return mock_token
     
     def get_auth_headers(self) -> dict:
         """인증 헤더 반환"""
